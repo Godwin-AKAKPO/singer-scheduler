@@ -12,3 +12,4 @@ Route::get('/', function () {
 Route::resource('membres', MembreController::class);
 Route::resource('sessions', SessionMensuelleController::class);
 Route::post('sessions/{session}/generer', [ProgrammationController::class, 'generer'])->name('programmation.generer');
+Route::get('sessions/{session}/pdf', [ProgrammationController::class, 'exportPdf'])->name('programmation.pdf');

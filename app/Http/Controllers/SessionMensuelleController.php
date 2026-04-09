@@ -2,63 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SessionMensuelle;
+use App\Models\Membre;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class SessionMensuelleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return Inertia::render('Sessions/Index', [
+            'sessions' => SessionMensuelle::orderByDesc('annee')
+                                          ->orderByDesc('mois')
+                                          ->get(),
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return Inertia::render('Sessions/Form', [
+            'membres' => Membre::orderBy('nom')->get(),
+            'session' => null,
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'annee'              => 'required|integer|min:2024',
+            'mois'               => 'required|integer|min:1|max:12',
+            'absences'           => 'nullable|array',
+            'absences.*.nom'     => 'required|string',
+            'absences.*.dates'   => 'required|array',
+            'absences.*.dates.*' => 'date',
+        ]);
+
+        // Vérifier qu'une session n'existe pas déjà pour ce mois
+        $existe = SessionMensuelle::where('annee', $validated['annee'])
+                                  ->where('mois', $validated['mois'])
+                                  ->exists();
+
+        if ($existe) {
+            return back()->withErrors([
+                'mois' => 'Une session existe déjà pour ce mois.',
+            ]);
+        }
+
+        SessionMensuelle::create($validated);
+
+        return redirect()->route('sessions.index')->with('success', 'Session créée.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(SessionMensuelle $session)
     {
-        //
+        return Inertia::render('Sessions/Show', [
+            'session' => $session,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy(SessionMensuelle $session)
     {
-        //
-    }
+        $session->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('sessions.index')->with('success', 'Session supprimée.');
     }
 }

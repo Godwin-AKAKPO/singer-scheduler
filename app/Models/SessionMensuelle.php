@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class SessionMensuelle extends Model
 {
+    protected $table = 'sessions_mensuelles';
+
     protected $fillable = [
         'annee',
         'mois',
@@ -14,7 +16,7 @@ class SessionMensuelle extends Model
     ];
 
     protected $casts = [
-        'absences'       => 'array',
-        'programmation'  => 'array',
+        'absences'      => 'array',
+        'programmation' => 'array',
     ];
 }

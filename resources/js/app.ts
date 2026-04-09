@@ -1,10 +1,18 @@
+import './bootstrap';
+import { createApp, h, DefineComponent } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
-
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { ZiggyVue } from 'ziggy-js';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
-    progress: {
-        color: '#4B5563',
+    resolve: (name) => resolvePageComponent(
+        `./pages/${name}.vue`,
+        import.meta.glob<DefineComponent>('./pages/**/*.vue')
+    ),
+    setup({ el, App, props, plugin }) {
+        createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .use(ZiggyVue)
+            .mount(el);
     },
 });
