@@ -125,12 +125,12 @@
     </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="js">
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-const props = defineProps({ membres: Array, session: Object });
+// const props = defineProps({ membres: Array, session: Object });
 
 const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 

@@ -220,7 +220,7 @@
     </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="js">
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';

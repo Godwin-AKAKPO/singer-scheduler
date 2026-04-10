@@ -104,7 +104,7 @@
     </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="js">
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 

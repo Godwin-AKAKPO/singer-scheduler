@@ -125,7 +125,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="js">
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
