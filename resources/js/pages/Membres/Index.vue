@@ -6,7 +6,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Membres</h1>
-                    <p class="text-sm text-gray-500 mt-1">{{ membres.length }} membre(s) enregistré(s)</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ membres.total }} membre(s) enregistré(s)</p>
                 </div>
                 <Link
                     :href="route('membres.create')"
@@ -19,15 +19,84 @@
                 </Link>
             </div>
 
+            <!-- Recherche + Filtres -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+                <div class="flex flex-col sm:flex-row gap-3">
+
+                    <!-- Barre de recherche -->
+                    <div class="relative flex-1">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            v-model="searchQuery"
+                            @input="handleSearch"
+                            type="text"
+                            placeholder="Rechercher un membre..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    <!-- Filtre par culte -->
+                    <select
+                        v-model="culteFilter"
+                        @change="handleFilter"
+                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">Tous les cultes</option>
+                        <option value="C1">Culte 1 uniquement</option>
+                        <option value="C2">Culte 2 uniquement</option>
+                    </select>
+
+                    <!-- Filtre par rôle -->
+                    <select
+                        v-model="roleFilter"
+                        @change="handleFilter"
+                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="">Tous les rôles</option>
+                        <option value="lead">Lead</option>
+                        <option value="choeur_p1">Choeur P1</option>
+                        <option value="choeur_p2">Choeur P2</option>
+                        <option value="choeur_p3">Choeur P3</option>
+                        <option value="piano1">Piano 1</option>
+                        <option value="piano2">Piano 2</option>
+                        <option value="solo">Solo</option>
+                        <option value="basse">Basse</option>
+                        <option value="batterie">Batterie</option>
+                    </select>
+
+                    <!-- Bouton reset -->
+                    <button
+                        v-if="searchQuery || culteFilter || roleFilter"
+                        @click="resetFiltres"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Réinitialiser
+                    </button>
+                </div>
+            </div>
+
             <!-- Tableau -->
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-                <div v-if="membres.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4">
+                <div v-if="membres.data.length === 0" class="flex flex-col items-center justify-center py-16 text-center px-4">
                     <svg class="h-12 w-12 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <h3 class="text-base font-medium text-gray-900 mb-1">Aucun membre enregistré</h3>
-                    <p class="text-sm text-gray-500 mb-4">Commencez par ajouter les membres du groupe.</p>
-                    <Link :href="route('membres.create')" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <h3 class="text-base font-medium text-gray-900 mb-1">
+                        {{ searchQuery || culteFilter || roleFilter ? 'Aucun résultat trouvé' : 'Aucun membre enregistré' }}
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">
+                        {{ searchQuery || culteFilter || roleFilter
+                            ? 'Essayez de modifier vos critères de recherche.'
+                            : 'Commencez par ajouter les membres du groupe.' }}
+                    </p>
+                    <Link v-if="!searchQuery && !culteFilter && !roleFilter"
+                        :href="route('membres.create')"
+                        class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
                         Ajouter un membre
                     </Link>
                 </div>
@@ -44,14 +113,9 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <tr v-for="membre in membres" :key="membre.id" class="hover:bg-gray-50 transition-colors">
+                            <tr v-for="membre in membres.data" :key="membre.id" class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center gap-3">
-                                        <!-- <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-semibold">
-                                            {{ membre.nom.charAt(0).toUpperCase() }}
-                                        </div> -->
-                                        <span class="text-sm font-medium text-gray-900">{{ membre.nom }}</span>
-                                    </div>
+                                    <span class="text-sm font-medium text-gray-900">{{ membre.nom }}</span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex gap-1">
@@ -101,6 +165,57 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Pagination -->
+            <div v-if="membres.last_page > 1" class="flex items-center justify-between">
+                <p class="text-sm text-gray-500">
+                    Affichage de <span class="font-medium">{{ membres.from }}</span> à <span class="font-medium">{{ membres.to }}</span> sur <span class="font-medium">{{ membres.total }}</span> membres
+                </p>
+                <div class="flex items-center gap-1">
+                    <!-- Précédent -->
+                    <button
+                        @click="goToPage(membres.current_page - 1)"
+                        :disabled="membres.current_page === 1"
+                        class="flex items-center justify-center w-8 h-8 rounded-lg border text-sm transition-colors"
+                        :class="membres.current_page === 1
+                            ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                            : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Pages -->
+                    <template v-for="page in pagesVisibles" :key="page">
+                        <span v-if="page === '...'" class="flex items-center justify-center w-8 h-8 text-sm text-gray-400">...</span>
+                        <button
+                            v-else
+                            @click="goToPage(page)"
+                            class="flex items-center justify-center w-8 h-8 rounded-lg border text-sm font-medium transition-colors"
+                            :class="page === membres.current_page
+                                ? 'bg-blue-600 border-blue-600 text-white'
+                                : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
+                        >
+                            {{ page }}
+                        </button>
+                    </template>
+
+                    <!-- Suivant -->
+                    <button
+                        @click="goToPage(membres.current_page + 1)"
+                        :disabled="membres.current_page === membres.last_page"
+                        class="flex items-center justify-center w-8 h-8 rounded-lg border text-sm transition-colors"
+                        :class="membres.current_page === membres.last_page
+                            ? 'border-gray-200 text-gray-300 cursor-not-allowed'
+                            : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>
@@ -108,8 +223,19 @@
 <script setup>
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { debounce } from 'lodash';
 
-defineProps({ membres: Array });
+const props = defineProps({
+    membres: Object, // paginated
+    search: String,
+    culte: String,
+    role: String,
+});
+
+const searchQuery = ref(props.search || '');
+const culteFilter = ref(props.culte || '');
+const roleFilter  = ref(props.role  || '');
 
 const getRoles = (membre) => {
     const roles = [];
@@ -124,6 +250,56 @@ const getRoles = (membre) => {
     if (membre.batterie)  roles.push('Batterie');
     return roles;
 };
+
+const handleSearch = debounce(() => {
+    router.get(route('membres.index'), {
+        search: searchQuery.value,
+        culte:  culteFilter.value,
+        role:   roleFilter.value,
+    }, { preserveState: true, replace: true });
+}, 300);
+
+const handleFilter = () => {
+    router.get(route('membres.index'), {
+        search: searchQuery.value,
+        culte:  culteFilter.value,
+        role:   roleFilter.value,
+    }, { preserveState: true, replace: true });
+};
+
+const resetFiltres = () => {
+    searchQuery.value = '';
+    culteFilter.value = '';
+    roleFilter.value  = '';
+    router.get(route('membres.index'), {}, { preserveState: true, replace: true });
+};
+
+const goToPage = (page) => {
+    if (page < 1 || page > props.membres.last_page) return;
+    router.get(route('membres.index'), {
+        search: searchQuery.value,
+        culte:  culteFilter.value,
+        role:   roleFilter.value,
+        page,
+    }, { preserveState: true, replace: true });
+};
+
+const pagesVisibles = computed(() => {
+    const current = props.membres.current_page;
+    const last    = props.membres.last_page;
+    const pages   = [];
+
+    if (last <= 7) {
+        for (let i = 1; i <= last; i++) pages.push(i);
+    } else {
+        pages.push(1);
+        if (current > 3)       pages.push('...');
+        for (let i = Math.max(2, current - 1); i <= Math.min(last - 1, current + 1); i++) pages.push(i);
+        if (current < last - 2) pages.push('...');
+        pages.push(last);
+    }
+    return pages;
+});
 
 const supprimer = (membre) => {
     if (confirm(`Supprimer ${membre.nom} ?`)) {

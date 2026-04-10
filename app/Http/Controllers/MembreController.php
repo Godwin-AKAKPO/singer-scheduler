@@ -8,12 +8,32 @@ use Inertia\Inertia;
 
 class MembreController extends Controller
 {
-    public function index()
-    {
-        return Inertia::render('Membres/Index', [
-            'membres' => Membre::orderBy('nom')->get(),
-        ]);
+  public function index(Request $request)
+{
+    $query = Membre::query()->orderBy('nom');
+
+    // Recherche par nom
+    if ($request->filled('search')) {
+        $query->where('nom', 'ilike', '%' . $request->search . '%');
     }
+
+    // Filtre par culte
+    if ($request->filled('culte')) {
+        $query->whereJsonContains('cultes_autorises', $request->culte);
+    }
+
+    // Filtre par rôle
+    if ($request->filled('role')) {
+        $query->where($request->role, true);
+    }
+
+    return Inertia::render('Membres/Index', [
+        'membres' => $query->paginate(12)->withQueryString(),
+        'search'  => $request->search ?? '',
+        'culte'   => $request->culte  ?? '',
+        'role'    => $request->role   ?? '',
+    ]);
+}
 
     public function create()
     {

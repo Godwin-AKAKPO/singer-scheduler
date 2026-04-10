@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('membres.index');
-});
+})->name('home');;
 
 Route::resource('membres', MembreController::class);
 Route::resource('sessions', SessionMensuelleController::class);
