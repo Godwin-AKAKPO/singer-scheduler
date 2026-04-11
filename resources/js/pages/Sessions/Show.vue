@@ -31,7 +31,7 @@
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        {{ session.programmation ? 'Regénérer' : 'Générer la programmation' }}
+                        {{ session.programmation ? 'Regénérer' : 'Générer' }}
                     </button>
                 </div>
             </div>
@@ -48,70 +48,143 @@
                 <p class="text-sm text-gray-500 mb-5 max-w-sm">Lancez la génération automatique pour répartir équitablement les membres sur les cultes du mois.</p>
                 <button @click="generer"
                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
                     Générer la programmation
                 </button>
             </div>
 
-            <!-- Programmation en vue tableau -->
-            <div v-else class="space-y-10">
-                <div v-for="dimanche in dimanches" :key="dimanche">
+            <!-- Carousel -->
+            <div v-else class="space-y-4">
 
-                    <!-- En-tête dimanche -->
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-emerald-600 text-white shadow-sm">
-                            <span class="text-xs font-medium leading-none opacity-80">{{ getJourAbrege(dimanche) }}</span>
-                            <span class="text-lg font-bold leading-tight">{{ getJour(dimanche) }}</span>
-                        </div>
-                        <div>
-                            <h2 class="text-base font-semibold text-gray-900 capitalize">{{ formatDate(dimanche) }}</h2>
-                            <p class="text-xs text-gray-400">2 cultes programmés</p>
-                        </div>
+                <!-- Navigation dots + flèches -->
+                <div class="flex items-center justify-between">
+                    <!-- Flèche gauche -->
+                    <button @click="precedent"
+                        :disabled="indexActif === 0"
+                        class="flex items-center justify-center w-9 h-9 rounded-lg border transition-colors"
+                        :class="indexActif === 0
+                            ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Dots -->
+                    <div class="flex items-center gap-2">
+                        <button
+                            v-for="(dimanche, i) in dimanches" :key="dimanche"
+                            @click="indexActif = i"
+                            class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all"
+                            :class="i === indexActif ? 'bg-emerald-50' : 'hover:bg-gray-50'"
+                        >
+                            <span class="text-xs font-semibold transition-colors"
+                                :class="i === indexActif ? 'text-emerald-700' : 'text-gray-400'">
+                                {{ getJourAbrege(dimanche) }}
+                            </span>
+                            <span class="text-sm font-bold transition-colors"
+                                :class="i === indexActif ? 'text-emerald-700' : 'text-gray-400'">
+                                {{ getJour(dimanche) }}
+                            </span>
+                            <span class="block w-1.5 h-1.5 rounded-full transition-colors"
+                                :class="i === indexActif ? 'bg-emerald-500' : 'bg-gray-200'">
+                            </span>
+                        </button>
                     </div>
 
-                    <!-- Tableau horizontal des deux cultes -->
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-100">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider w-28">Rôle</th>
-                                    <th class="px-4 py-3 text-left w-1/2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-600 text-white text-xs font-bold">C1</span>
-                                            <span class="text-sm font-semibold text-gray-700">1er Culte</span>
-                                        </div>
-                                    </th>
-                                    <th class="px-4 py-3 text-left w-1/2 border-l border-gray-100">
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-500 text-white text-xs font-bold">C2</span>
-                                            <span class="text-sm font-semibold text-gray-700">2ème Culte</span>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                <tr v-for="(ligne, index) in getLignes(dimanche)" :key="ligne.role"
-                                    :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'">
-                                    <td class="px-4 py-2.5">
-                                        <span class="text-xs font-medium text-gray-400">{{ ligne.label }}</span>
-                                    </td>
-                                    <td class="px-4 py-2.5">
-                                        <span :class="ligne.c1 && ligne.c1 !== '—' ? 'text-gray-900 font-medium' : 'text-gray-300'">
-                                            {{ ligne.c1 || '—' }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-2.5 border-l border-gray-100">
-                                        <span :class="ligne.c2 && ligne.c2 !== '—' ? 'text-gray-900 font-medium' : 'text-gray-300'">
-                                            {{ ligne.c2 || '—' }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Flèche droite -->
+                    <button @click="suivant"
+                        :disabled="indexActif === dimanches.length - 1"
+                        class="flex items-center justify-center w-9 h-9 rounded-lg border transition-colors"
+                        :class="indexActif === dimanches.length - 1
+                            ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
+
+                <!-- Slide actif -->
+                <Transition name="slide" mode="out-in">
+                    <div :key="indexActif" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <!-- Culte 1 -->
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <!-- En-tête -->
+                            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-7 h-7 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                                    <span class="text-sm font-semibold text-gray-800">1er Culte</span>
+                                </div>
+                                <span class="text-xs text-gray-400">{{ formatDateCourt(dimanches[indexActif]) }}</span>
+                            </div>
+
+                            <!-- Lead -->
+                            <div class="px-5 py-4 flex items-center gap-3 border-b border-gray-50">
+                                <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wide leading-none mb-1">Lead</p>
+                                    <p class="text-sm font-bold text-gray-900">
+                                        {{ getCulte(dimanches[indexActif], 'C1')?.lead?.[0] ?? '—' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Rôles -->
+                            <div class="px-5 py-4 grid grid-cols-2 gap-x-6 gap-y-4">
+                                <div v-for="role in getRoles('C1', dimanches[indexActif])" :key="role.label">
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wide leading-none mb-1">{{ role.label }}</p>
+                                    <p :class="role.valeur !== '—' ? 'text-sm font-medium text-gray-800' : 'text-sm text-gray-300'">
+                                        {{ role.valeur }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Culte 2 -->
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <!-- En-tête -->
+                            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-7 h-7 rounded-lg bg-emerald-500 text-white text-xs font-bold flex items-center justify-center">2</span>
+                                    <span class="text-sm font-semibold text-gray-800">2ème Culte</span>
+                                </div>
+                                <span class="text-xs text-gray-400">{{ formatDateCourt(dimanches[indexActif]) }}</span>
+                            </div>
+
+                            <!-- Lead -->
+                            <div class="px-5 py-4 flex items-center gap-3 border-b border-gray-50">
+                                <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                    <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wide leading-none mb-1">Lead</p>
+                                    <p class="text-sm font-bold text-gray-900">
+                                        {{ getCulte(dimanches[indexActif], 'C2')?.lead?.[0] ?? '—' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Rôles -->
+                            <div class="px-5 py-4 grid grid-cols-2 gap-x-6 gap-y-4">
+                                <div v-for="role in getRoles('C2', dimanches[indexActif])" :key="role.label">
+                                    <p class="text-xs text-gray-400 font-medium uppercase tracking-wide leading-none mb-1">{{ role.label }}</p>
+                                    <p :class="role.valeur !== '—' ? 'text-sm font-medium text-gray-800' : 'text-sm text-gray-300'">
+                                        {{ role.valeur }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </Transition>
+
             </div>
         </div>
     </AppLayout>
@@ -120,9 +193,11 @@
 <script setup>
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({ session: Object });
+
+const indexActif = ref(0);
 
 const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const getNomMois = (m) => moisNoms[m - 1];
@@ -142,11 +217,6 @@ const dimanches = computed(() => {
     return result;
 });
 
-const formatDate = (dateStr) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-};
-
 const getJour = (dateStr) => {
     const [y, m, d] = dateStr.split('-').map(Number);
     return new Date(y, m - 1, d).getDate();
@@ -157,26 +227,46 @@ const getJourAbrege = (dateStr) => {
     return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
 };
 
+const formatDateCourt = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+};
+
 const getCulte = (dimanche, culte) => {
     return props.session.programmation?.find(p => p.date === dimanche && p.culte === culte);
 };
 
-const getLignes = (dimanche) => {
-    const c1 = getCulte(dimanche, 'C1');
-    const c2 = getCulte(dimanche, 'C2');
-
+const getRoles = (culte, dimanche) => {
+    const c = getCulte(dimanche, culte);
     return [
-        { label: 'Lead',      c1: c1?.lead?.[0]              ?? '—', c2: c2?.lead?.[0]              ?? '—' },
-        { label: 'Choeur P1', c1: c1?.choeur?.p1?.join(', ') || '—', c2: c2?.choeur?.p1?.join(', ') || '—' },
-        { label: 'Choeur P2', c1: c1?.choeur?.p2?.[0]        ?? '—', c2: c2?.choeur?.p2?.[0]        ?? '—' },
-        { label: 'Choeur P3', c1: c1?.choeur?.p3?.[0]        ?? '—', c2: c2?.choeur?.p3?.[0]        ?? '—' },
-        { label: 'Piano 1',   c1: c1?.piano1?.[0]            ?? '—', c2: c2?.piano1?.[0]            ?? '—' },
-        { label: 'Piano 2',   c1: c1?.piano2?.[0]            ?? '—', c2: c2?.piano2?.[0]            ?? '—' },
-        { label: 'Solo',      c1: c1?.solo?.[0]              ?? '—', c2: c2?.solo?.[0]              ?? '—' },
-        { label: 'Basse',     c1: c1?.basse?.[0]             ?? '—', c2: c2?.basse?.[0]             ?? '—' },
-        { label: 'Batterie',  c1: c1?.batterie?.[0]          ?? '—', c2: c2?.batterie?.[0]          ?? '—' },
+        { label: 'Choeur P1', valeur: c?.choeur?.p1?.join(', ') || '—' },
+        { label: 'Choeur P2', valeur: c?.choeur?.p2?.[0]        ?? '—' },
+        { label: 'Choeur P3', valeur: c?.choeur?.p3?.[0]        ?? '—' },
+        { label: 'Piano 1',   valeur: c?.piano1?.[0]            ?? '—' },
+        { label: 'Piano 2',   valeur: c?.piano2?.[0]            ?? '—' },
+        { label: 'Solo',      valeur: c?.solo?.[0]              ?? '—' },
+        { label: 'Basse',     valeur: c?.basse?.[0]             ?? '—' },
+        { label: 'Batterie',  valeur: c?.batterie?.[0]          ?? '—' },
     ];
 };
 
+const precedent = () => { if (indexActif.value > 0) indexActif.value--; };
+const suivant   = () => { if (indexActif.value < dimanches.value.length - 1) indexActif.value++; };
+
 const generer = () => router.post(route('programmation.generer', props.session.id));
 </script>
+
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+    transition: all 0.25s ease;
+}
+.slide-enter-from {
+    opacity: 0;
+    transform: translateX(24px);
+}
+.slide-leave-to {
+    opacity: 0;
+    transform: translateX(-24px);
+}
+</style>
