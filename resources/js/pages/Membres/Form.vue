@@ -29,7 +29,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom complet</label>
                             <input v-model="form.nom" type="text"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
                                 placeholder="Ex : Benjamin" />
                             <p v-if="form.errors.nom" class="text-red-500 text-xs mt-1.5">{{ form.errors.nom }}</p>
                         </div>
@@ -41,10 +41,10 @@
                                 <label v-for="culte in ['C1', 'C2']" :key="culte"
                                     class="flex items-center gap-2.5 px-4 py-2.5 rounded-lg border cursor-pointer transition-colors"
                                     :class="form.cultes_autorises.includes(culte)
-                                        ? 'bg-blue-50 border-blue-300 text-blue-700'
+                                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                                         : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'"
                                 >
-                                    <input type="checkbox" :value="culte" v-model="form.cultes_autorises" class="rounded text-blue-600" />
+                                    <input type="checkbox" :value="culte" v-model="form.cultes_autorises" class="rounded text-emerald-600" />
                                     <span class="text-sm font-medium">{{ culte === 'C1' ? '1er Culte' : '2ème Culte' }}</span>
                                 </label>
                             </div>
@@ -55,11 +55,11 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">
                                 Score de préférence
-                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">
                                     {{ form.score }} / 10
                                 </span>
                             </label>
-                            <input type="range" v-model.number="form.score" min="1" max="10" class="w-full accent-blue-600" />
+                            <input type="range" v-model.number="form.score" min="1" max="10" class="w-full accent-emerald-600" />
                             <div class="flex justify-between text-xs text-gray-400 mt-1">
                                 <span>1 — débutant</span>
                                 <span>10 — expert</span>
@@ -75,10 +75,10 @@
                         <label v-for="role in roles" :key="role.key"
                             class="flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer transition-colors"
                             :class="form[role.key]
-                                ? 'bg-blue-50 border-blue-300 text-blue-700'
+                                ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
                                 : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'"
                         >
-                            <input type="checkbox" v-model="form[role.key]" class="rounded text-blue-600" />
+                            <input type="checkbox" v-model="form[role.key]" class="rounded text-emerald-600" />
                             <span class="text-sm font-medium">{{ role.label }}</span>
                         </label>
                     </div>
@@ -91,7 +91,7 @@
                         Annuler
                     </Link>
                     <button type="submit" :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50">
+                        class="inline-flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50">
                         <svg v-if="form.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -104,7 +104,7 @@
     </AppLayout>
 </template>
 
-<script setup lang="js">
+<script setup>
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 

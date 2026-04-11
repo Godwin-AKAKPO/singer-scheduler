@@ -9,7 +9,7 @@
                     <p class="text-sm text-gray-500 mt-1">{{ sessions.length }} session(s) créée(s)</p>
                 </div>
                 <Link :href="route('sessions.create')"
-                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+                    class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
@@ -25,7 +25,7 @@
                     </svg>
                     <h3 class="text-base font-medium text-gray-900 mb-1">Aucune session créée</h3>
                     <p class="text-sm text-gray-500 mb-4">Créez une session pour générer la programmation du mois.</p>
-                    <Link :href="route('sessions.create')" class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <Link :href="route('sessions.create')" class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
                         Nouvelle session
                     </Link>
                 </div>
@@ -44,9 +44,9 @@
                             <tr v-for="session in sessions" :key="session.id" class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex-shrink-0 h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">
+                                        <!-- <div class="flex-shrink-0 h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 text-xs font-bold">
                                             {{ session.mois }}
-                                        </div>
+                                        </div> -->
                                         <div>
                                             <div class="text-sm font-semibold text-gray-900">{{ getNomMois(session.mois) }} {{ session.annee }}</div>
                                             <div class="text-xs text-gray-500">{{ getNbDimanches(session.annee, session.mois) }} dimanches</div>
@@ -71,7 +71,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <Link :href="route('sessions.show', session.id)"
-                                            class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                                            class="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-800 font-medium transition-colors">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -96,7 +96,7 @@
     </AppLayout>
 </template>
 
-<script setup lang="js">
+<script setup>
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 

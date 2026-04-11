@@ -10,7 +10,7 @@
                 </div>
                 <Link
                     :href="route('membres.create')"
-                    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                    class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -33,7 +33,7 @@
                             @input="handleSearch"
                             type="text"
                             placeholder="Rechercher un membre..."
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
                     </div>
 
@@ -41,7 +41,7 @@
                     <select
                         v-model="culteFilter"
                         @change="handleFilter"
-                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     >
                         <option value="">Tous les cultes</option>
                         <option value="C1">Culte 1 uniquement</option>
@@ -52,7 +52,7 @@
                     <select
                         v-model="roleFilter"
                         @change="handleFilter"
-                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     >
                         <option value="">Tous les rôles</option>
                         <option value="lead">Lead</option>
@@ -96,7 +96,7 @@
                     </p>
                     <Link v-if="!searchQuery && !culteFilter && !roleFilter"
                         :href="route('membres.create')"
-                        class="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                        class="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors">
                         Ajouter un membre
                     </Link>
                 </div>
@@ -120,7 +120,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex gap-1">
                                         <span v-for="culte in membre.cultes_autorises" :key="culte"
-                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
                                             {{ culte }}
                                         </span>
                                     </div>
@@ -136,9 +136,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-2">
                                         <div class="flex-1 bg-gray-200 rounded-full h-1.5 w-16">
-                                            <div class="bg-blue-600 h-1.5 rounded-full" :style="{ width: (membre.score * 10) + '%' }"></div>
+                                            <div class="bg-emerald-600 h-1.5 rounded-full" :style="{ width: (membre.score * 10) + '%' }"></div>
                                         </div>
-                                        <span class="text-sm font-semibold text-blue-700">{{ membre.score }}</span>
+                                        <span class="text-sm font-semibold text-emerald-700">{{ membre.score }}</span>
                                         <span class="text-xs text-gray-400">/10</span>
                                     </div>
                                 </td>
@@ -194,7 +194,7 @@
                             @click="goToPage(page)"
                             class="flex items-center justify-center w-8 h-8 rounded-lg border text-sm font-medium transition-colors"
                             :class="page === membres.current_page
-                                ? 'bg-blue-600 border-blue-600 text-white'
+                                ? 'bg-emerald-600 border-emerald-600 text-white'
                                 : 'border-gray-300 text-gray-600 hover:bg-gray-50'"
                         >
                             {{ page }}
@@ -220,7 +220,7 @@
     </AppLayout>
 </template>
 
-<script setup lang="js">
+<script setup>
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';

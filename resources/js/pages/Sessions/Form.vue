@@ -24,7 +24,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Mois</label>
                             <select v-model.number="form.mois"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                                 <option v-for="(nom, index) in moisNoms" :key="index" :value="index + 1">{{ nom }}</option>
                             </select>
                             <p v-if="form.errors.mois" class="text-red-500 text-xs mt-1">{{ form.errors.mois }}</p>
@@ -32,13 +32,13 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Année</label>
                             <input v-model.number="form.annee" type="number" min="2024"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
                             <p v-if="form.errors.annee" class="text-red-500 text-xs mt-1">{{ form.errors.annee }}</p>
                         </div>
                     </div>
 
                     <!-- Dimanches calculés -->
-                    <div class="mt-4 flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+                    <div class="mt-4 flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">
                         <svg class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -51,7 +51,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wider">Absences déclarées</h2>
                         <button type="button" @click="ajouterAbsence"
-                            class="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                            class="inline-flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-800 font-medium transition-colors">
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
@@ -74,7 +74,7 @@
                                     <div>
                                         <label class="block text-xs font-medium text-gray-600 mb-1">Membre</label>
                                         <select v-model="absence.nom"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
                                             <option value="">-- Choisir un membre --</option>
                                             <option v-for="membre in membres" :key="membre.id" :value="membre.nom">{{ membre.nom }}</option>
                                         </select>
@@ -112,7 +112,7 @@
                         Annuler
                     </Link>
                     <button type="submit" :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50">
+                        class="inline-flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50">
                         <svg v-if="form.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -125,12 +125,12 @@
     </AppLayout>
 </template>
 
-<script setup lang="js">
+<script setup>
 import AppLayout from '@/pages/AppLayout.vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
-// const props = defineProps({ membres: Array, session: Object });
+const props = defineProps({ membres: Array, session: Object });
 
 const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
