@@ -56,9 +56,9 @@
                     >
                         <option value="">Tous les rôles</option>
                         <option value="lead">Lead</option>
-                        <option value="choeur_p1">Choeur P1</option>
-                        <option value="choeur_p2">Choeur P2</option>
-                        <option value="choeur_p3">Choeur P3</option>
+                        <option value="choeur_sopra">Sopra</option>
+                        <option value="choeur_alto">Alto</option>
+                        <option value="choeur_tenor">Ténor</option>
                         <option value="piano1">Piano 1</option>
                         <option value="piano2">Piano 2</option>
                         <option value="solo">Solo</option>
@@ -145,7 +145,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <Link :href="route('membres.edit', membre.id)"
-                                            class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                                            class="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-800 font-medium transition-colors">
                                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -239,10 +239,10 @@ const roleFilter  = ref(props.role  || '');
 
 const getRoles = (membre) => {
     const roles = [];
-    if (membre.lead)      roles.push('Lead');
-    if (membre.choeur_p1) roles.push('Choeur P1');
-    if (membre.choeur_p2) roles.push('Choeur P2');
-    if (membre.choeur_p3) roles.push('Choeur P3');
+    if (membre.lead_c1 || membre.lead_c2)      roles.push('Lead');
+    if (membre.choeur_sopra) roles.push('Sopra');
+    if (membre.choeur_alto) roles.push('Alto');
+    if (membre.choeur_tenor) roles.push('Ténor');
     if (membre.piano1)    roles.push('Piano 1');
     if (membre.piano2)    roles.push('Piano 2');
     if (membre.solo)      roles.push('Solo');

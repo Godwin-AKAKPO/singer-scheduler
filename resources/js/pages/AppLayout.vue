@@ -9,11 +9,9 @@
                     <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                             <Link :href="route('membres.index')" class="flex items-center space-x-3 group">
-                                <div class="flex items-center justify-center h-9 w-9 rounded-lg bg-emerald-600 text-white font-bold text-sm shadow-sm group-hover:bg-emerald-700 transition-colors">
-                                    SS
-                                </div>
+                              
                                 <div class="hidden sm:block">
-                                    <h1 class="text-lg font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                                    <h1 class="text-lg font-bold text-emerald-700 group-hover:text-emerald-400 transition-colors">
                                         Singer Scheduler
                                     </h1>
                                 </div>
