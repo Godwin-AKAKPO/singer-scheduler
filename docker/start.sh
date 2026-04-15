@@ -4,7 +4,7 @@ set -e
 cd /var/www/html
 
 echo "==> Génération de la clé app..."
-php artisan key:generate --force
+# php artisan key:generate --force
 
 echo "==> Cache config + routes..."
 php artisan config:cache
