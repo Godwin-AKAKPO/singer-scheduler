@@ -24,3 +24,12 @@ Route::get('/debug-db', function () {
         return "Erreur lors de la migration : " . $e->getMessage();
     }
 });
+Route::get('/force-init', function () {
+    try {
+        // migrate:fresh supprime tout et recrée tout
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        return "Base de données réinitialisée avec succès !";
+    } catch (\Exception $e) {
+        return "Erreur : " . $e->getMessage();
+    }
+});
