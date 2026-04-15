@@ -5,97 +5,72 @@ namespace App\Http\Controllers;
 use App\Models\Membre;
 use App\Models\SessionMensuelle;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProgrammationController extends Controller
 {
-    
-
     public function generer(SessionMensuelle $session)
     {
-        $membres = Membre::all()->toArray();
+        $membres   = Membre::all()->toArray();
         $dimanches = $this->getDimanches($session->annee, $session->mois);
-        $absences = $session->absences ?? [];
+        $absences  = $session->absences ?? [];
 
         // Compteur par rôle et par membre
         $passages = [];
-        foreach ($membres as $membre) {
-            $passages[$membre['nom']] = [
-                'lead'      => 0,
-                'choeur_p1' => 0,
-                'choeur_p2' => 0,
-                'choeur_p3' => 0,
-                'piano1'    => 0,
-                'piano2'    => 0,
-                'solo'      => 0,
-                'basse'     => 0,
-                'batterie'  => 0,
+        foreach ($membres as $m) {
+            $passages[$m['nom']] = [
+                'lead_c1'      => 0,
+                'lead_c2'      => 0,
+                'choeur_sopra' => 0,
+                'choeur_alto'  => 0,
+                'choeur_tenor' => 0,
+                'piano1'       => 0,
+                'piano2'       => 0,
+                'solo'         => 0,
+                'basse'        => 0,
+                'batterie'     => 0,
             ];
         }
 
         $programmation = [];
 
         foreach ($dimanches as $dimanche) {
-            // Membres déjà assignés ce dimanche (toutes les deux cultes confondus)
-            $dejaProgrammesCeDimanche = [];
+            $dejaCeDimanche = [];
 
             foreach (['C1', 'C2'] as $culte) {
-                $disponibles = $this->getMembresDisponibles(
-                    $membres, $absences, $dimanche, $culte
-                );
+                $disponibles = $this->getMembresDisponibles($membres, $absences, $dimanche, $culte);
 
-                // Exclure ceux déjà programmés ce dimanche (dans l'autre culte)
+                // Exclure ceux déjà programmés ce dimanche
                 $disponibles = array_values(array_filter(
                     $disponibles,
-                    fn($m) => !in_array($m['nom'], $dejaProgrammesCeDimanche)
+                    fn($m) => !in_array($m['nom'], $dejaCeDimanche)
                 ));
 
-                // Membres déjà assignés dans CE culte (pour éviter double rôle)
-                $dejaAssignesCeCulte = [];
+                $dejaCeCulte = [];
 
-                $lead = $this->selectionner(
-                    $disponibles, 'lead', $passages, 1, $dejaAssignesCeCulte
-                );
+                // Le rôle lead dépend du culte
+                $roleLeadKey = $culte === 'C1' ? 'lead_c1' : 'lead_c2';
 
-                $choeurP1 = $this->selectionner(
-                    $disponibles, 'choeur_p1', $passages, 2, $dejaAssignesCeCulte
-                );
+                $lead = $this->selectionner($disponibles, $roleLeadKey, $passages, 1, $dejaCeCulte);
 
-                $choeurP2 = $this->selectionner(
-                    $disponibles, 'choeur_p2', $passages, 1, $dejaAssignesCeCulte
-                );
+                $sopra = $this->selectionner($disponibles, 'choeur_sopra', $passages, 2, $dejaCeCulte);
+                $alto  = $this->selectionner($disponibles, 'choeur_alto',  $passages, 1, $dejaCeCulte);
+                $tenor = $this->selectionner($disponibles, 'choeur_tenor', $passages, 1, $dejaCeCulte);
 
-                $choeurP3 = $this->selectionner(
-                    $disponibles, 'choeur_p3', $passages, 1, $dejaAssignesCeCulte
-                );
-
-                $piano1 = $this->selectionner(
-                    $disponibles, 'piano1', $passages, 1, $dejaAssignesCeCulte
-                );
-
-                $piano2 = $this->selectionner(
-                    $disponibles, 'piano2', $passages, 1, $dejaAssignesCeCulte
-                );
-
-                $solo = $this->selectionner(
-                    $disponibles, 'solo', $passages, 1, $dejaAssignesCeCulte
-                );
-
-                $basse = $this->selectionner(
-                    $disponibles, 'basse', $passages, 1, $dejaAssignesCeCulte
-                );
-
-                $batterie = $this->selectionner(
-                    $disponibles, 'batterie', $passages, 1, $dejaAssignesCeCulte
-                );
+                $piano1   = $this->selectionner($disponibles, 'piano1',   $passages, 1, $dejaCeCulte);
+                $piano2   = $this->selectionner($disponibles, 'piano2',   $passages, 1, $dejaCeCulte);
+                $solo     = $this->selectionner($disponibles, 'solo',     $passages, 1, $dejaCeCulte);
+                $basse    = $this->selectionner($disponibles, 'basse',    $passages, 1, $dejaCeCulte);
+                $batterie = $this->selectionner($disponibles, 'batterie', $passages, 1, $dejaCeCulte);
 
                 $programmation[] = [
-                    'date'     => $dimanche,
-                    'culte'    => $culte,
-                    'lead'     => $lead,
-                    'choeur'   => [
-                        'p1' => $choeurP1,
-                        'p2' => $choeurP2,
-                        'p3' => $choeurP3,
+                    'date'    => $dimanche,
+                    'culte'   => $culte,
+                    'lead'    => $lead,
+                    'choeur'  => [
+                        'sopra' => $sopra,
+                        'alto'  => $alto,
+                        'tenor' => $tenor,
                     ],
                     'piano1'   => $piano1,
                     'piano2'   => $piano2,
@@ -104,124 +79,94 @@ class ProgrammationController extends Controller
                     'batterie' => $batterie,
                 ];
 
-                // Ajouter tous ceux assignés ce culte à la liste du dimanche
-                $dejaProgrammesCeDimanche = array_merge(
-                    $dejaProgrammesCeDimanche,
-                    $dejaAssignesCeCulte
-                );
+                $dejaCeDimanche = array_merge($dejaCeDimanche, $dejaCeCulte);
             }
         }
 
         $session->update(['programmation' => $programmation]);
 
         return redirect()->route('sessions.show', $session)
-                        ->with('success', 'Programmation générée avec succès.');
+                         ->with('success', 'Programmation générée avec succès.');
     }
 
-    private function selectionner(
-        array $disponibles,
-        string $role,
-        array &$passages,
-        int $nombre,
-        array &$dejaAssignes
-    ): array {
-        // Filtrer éligibles pour ce rôle ET pas encore assignés dans ce culte
-        $eligibles = array_filter(
-            $disponibles,
-            fn($m) => $m[$role] === true && !in_array($m['nom'], $dejaAssignes)
-        );
+    public function modifier(Request $request, SessionMensuelle $session)
+    {
+        $request->validate([
+            'programmation' => 'required|array',
+        ]);
 
-        if (empty($eligibles)) {
-            return [];
-        }
+        $session->update(['programmation' => $request->programmation]);
 
-        // Mélange aléatoire avant le tri
-        $eligibles = array_values($eligibles);
-        shuffle($eligibles);
-
-        // Tri : passages croissant pour ce rôle, puis score décroissant
-        usort($eligibles, function ($a, $b) use ($passages, $role) {
-            $passA = $passages[$a['nom']][$role];
-            $passB = $passages[$b['nom']][$role];
-
-            if ($passA !== $passB) {
-                return $passA - $passB;
-            }
-
-            return $b['score'] - $a['score'];
-        });
-
-        $selectionnes = array_slice($eligibles, 0, $nombre);
-
-        foreach ($selectionnes as $membre) {
-            $passages[$membre['nom']][$role]++;
-            // Marquer comme assigné dans ce culte
-            $dejaAssignes[] = $membre['nom'];
-        }
-
-        return array_column($selectionnes, 'nom');
+        return back()->with('success', 'Programmation mise à jour.');
     }
+
+    public function exportPdf(SessionMensuelle $session)
+    {
+        $moisNoms = [
+            1 => 'Janvier', 2 => 'Février',   3 => 'Mars',      4 => 'Avril',
+            5 => 'Mai',     6 => 'Juin',       7 => 'Juillet',   8 => 'Août',
+            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre',
+        ];
+
+        $dimanches     = $this->getDimanches($session->annee, $session->mois);
+        $programmation = $session->programmation ?? [];
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.programmation', [
+            'session'       => $session,
+            'moisNom'       => $moisNoms[$session->mois],
+            'dimanches'     => $dimanches,
+            'programmation' => $programmation,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download("programmation-{$moisNoms[$session->mois]}-{$session->annee}.pdf");
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────
 
     private function getDimanches(int $annee, int $mois): array
     {
         $dimanches = [];
         $date = \Carbon\Carbon::create($annee, $mois, 1)->startOfMonth();
-
-        while ($date->dayOfWeek !== 0) {
-            $date->addDay();
-        }
-
+        while ($date->dayOfWeek !== 0) $date->addDay();
         while ($date->month === $mois) {
             $dimanches[] = $date->toDateString();
             $date->addWeek();
         }
-
         return $dimanches;
     }
 
-    private function getMembresDisponibles(
-        array $membres,
-        array $absences,
-        string $dimanche,
-        string $culte
-    ): array {
-        return array_values(array_filter($membres, function ($membre) use ($absences, $dimanche, $culte) {
-            if (!in_array($culte, $membre['cultes_autorises'])) {
-                return false;
-            }
+    private function getMembresDisponibles(array $membres, array $absences, string $dimanche, string $culte): array
+    {
+        return array_values(array_filter($membres, function ($m) use ($absences, $dimanche, $culte) {
+            if (!in_array($culte, $m['cultes_autorises'])) return false;
             foreach ($absences as $absence) {
-                if ($absence['nom'] === $membre['nom'] &&
-                    in_array($dimanche, $absence['dates'])) {
-                    return false;
-                }
+                if ($absence['nom'] === $m['nom'] && in_array($dimanche, $absence['dates'])) return false;
             }
             return true;
         }));
     }
 
-   
-
-    public function exportPdf(SessionMensuelle $session)
+    private function selectionner(array $disponibles, string $role, array &$passages, int $nombre, array &$dejaAssignes): array
     {
-        $moisNoms = [
-            1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
-            5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
-            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
-        ];
+        $eligibles = array_filter($disponibles, fn($m) => ($m[$role] ?? false) === true && !in_array($m['nom'], $dejaAssignes));
 
-        $dimanches = $this->getDimanches($session->annee, $session->mois);
-        $programmation = $session->programmation ?? [];
+        if (empty($eligibles)) return [];
 
-        $data = [
-            'session'       => $session,
-            'moisNom'       => $moisNoms[$session->mois],
-            'dimanches'     => $dimanches,
-            'programmation' => $programmation,
-        ];
+        $eligibles = array_values($eligibles);
+        shuffle($eligibles);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.programmation', $data)
-            ->setPaper('a4', 'landscape');
+        usort($eligibles, function ($a, $b) use ($passages, $role) {
+            $diff = $passages[$a['nom']][$role] - $passages[$b['nom']][$role];
+            return $diff !== 0 ? $diff : $b['score'] - $a['score'];
+        });
 
-        return $pdf->download("programmation-{$moisNoms[$session->mois]}-{$session->annee}.pdf");
+        $selectionnes = array_slice($eligibles, 0, $nombre);
+
+        foreach ($selectionnes as $m) {
+            $passages[$m['nom']][$role]++;
+            $dejaAssignes[] = $m['nom'];
+        }
+
+        return array_column($selectionnes, 'nom');
     }
 }

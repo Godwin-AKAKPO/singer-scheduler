@@ -6,13 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Membre extends Model
 {
+    protected $table = 'membres';
+
     protected $fillable = [
         'nom',
         'cultes_autorises',
-        'lead',
-        'choeur_p1',
-        'choeur_p2',
-        'choeur_p3',
+        'lead_c1',
+        'lead_c2',
+        'choeur_sopra',
+        'choeur_alto',
+        'choeur_tenor',
         'piano1',
         'piano2',
         'solo',
@@ -23,10 +26,11 @@ class Membre extends Model
 
     protected $casts = [
         'cultes_autorises' => 'array',
-        'lead'             => 'boolean',
-        'choeur_p1'        => 'boolean',
-        'choeur_p2'        => 'boolean',
-        'choeur_p3'        => 'boolean',
+        'lead_c1'          => 'boolean',
+        'lead_c2'          => 'boolean',
+        'choeur_sopra'     => 'boolean',
+        'choeur_alto'      => 'boolean',
+        'choeur_tenor'     => 'boolean',
         'piano1'           => 'boolean',
         'piano2'           => 'boolean',
         'solo'             => 'boolean',
