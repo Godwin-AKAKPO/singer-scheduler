@@ -1,33 +1,64 @@
-# -------- 1. Image de base PHP --------
-FROM php:8.3-cli
+FROM php:8.3-fpm-alpine
 
-# -------- 2. Installer dépendances système --------
-RUN apt-get update && apt-get install -y \
-    git unzip curl libpq-dev libzip-dev zip nodejs npm \
-    && docker-php-ext-install pdo pdo_pgsql zip
+# Extensions système
+RUN apk add --no-cache \
+    nginx \
+    nodejs \
+    npm \
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    supervisor
 
-# -------- 3. Installer Composer --------
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Extensions PHP
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql pgsql gd opcache pcntl
 
-# -------- 4. Définir le dossier de travail --------
-WORKDIR /app
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# -------- 5. Copier le projet --------
+WORKDIR /var/www/html
+
+# Copier les fichiers de dépendances en premier (cache Docker)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Copier tout le projet
 COPY . .
 
-# -------- 6. Installer dépendances PHP --------
-RUN composer install --no-dev --optimize-autoloader
+# Finaliser composer + build assets
+RUN composer dump-autoload --optimize \
+    && npm run build
 
-# -------- 7. Installer dépendances JS + build --------
-RUN npm install && npm run build
+# Permissions storage + cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
 
-# -------- 8. Optimisations Laravel --------
-# RUN php artisan config:cache \
-#  && php artisan route:cache \
-#  && php artisan view:cache
+# Config Nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-# -------- 9. Exposer le port --------
-EXPOSE 8000
+# Config PHP-FPM
+COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
-# -------- 10. Commande de démarrage -------
-CMD php artisan config:clear && php artisan serve --host=0.0.0.0 --port=8000
+# Config PHP
+COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Config Supervisor (nginx + php-fpm ensemble)
+COPY docker/supervisord.conf /etc/supervisord.conf
+
+# Script de démarrage
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
+
+EXPOSE 8080
+
+CMD ["/start.sh"]
