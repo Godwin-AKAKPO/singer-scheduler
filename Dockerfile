@@ -22,9 +22,9 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
 # -------- 8. Optimisations Laravel --------
-RUN php artisan config:cache \
- && php artisan route:cache \
- && php artisan view:cache
+# RUN php artisan config:cache \
+#  && php artisan route:cache \
+#  && php artisan view:cache
 
 # -------- 9. Exposer le port --------
 EXPOSE 8000
