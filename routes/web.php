@@ -15,21 +15,14 @@ Route::put('sessions/{session}/modifier',  [ProgrammationController::class, 'mod
 Route::get('sessions/{session}/pdf',       [ProgrammationController::class, 'exportPdf'])->name('programmation.pdf');
 
 
-Route::get('/debug-db', function () {
+Route::get('/repare-moi-ca', function () {
     try {
-        // Force le passage des migrations
-        Artisan::call('migrate', ['--force' => true]);
-        return "Succès : " . Artisan::output();
+        // Le --force est obligatoire en production pour migrate:fresh
+        Artisan::call('migrate:fresh', [
+            '--force' => true,
+        ]);
+        return " Succès ! Les tables ont été recréées : <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
-        return "Erreur lors de la migration : " . $e->getMessage();
-    }
-});
-Route::get('/force-init', function () {
-    try {
-        // migrate:fresh supprime tout et recrée tout
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        return "Base de données réinitialisée avec succès !";
-    } catch (\Exception $e) {
-        return "Erreur : " . $e->getMessage();
+        return " Erreur : " . $e->getMessage();
     }
 });

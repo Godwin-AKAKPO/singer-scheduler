@@ -29,5 +29,5 @@ RUN npm install && npm run build
 # -------- 9. Exposer le port --------
 EXPOSE 8000
 
-# -------- 10. Commande de démarrage --------
-CMD php artisan config:clear && php artisan migrate:fresh --force && php artisan serve --host=0.0.0.0 --port=8000
+# -------- 10. Commande de démarrage -------
+CMD php artisan config:clear && php artisan serve --host=0.0.0.0 --port=8000
