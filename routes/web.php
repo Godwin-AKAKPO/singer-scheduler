@@ -16,25 +16,19 @@ Route::post('sessions/{session}/generer',  [ProgrammationController::class, 'gen
 Route::put('sessions/{session}/modifier',  [ProgrammationController::class, 'modifier'])->name('programmation.modifier');
 Route::get('sessions/{session}/pdf',       [ProgrammationController::class, 'exportPdf'])->name('programmation.pdf');
 
-
-
 Route::get('/init-db-force', function () {
     try {
-        // 1. Vide le cache de config
-        Artisan::call('config:clear');
-
-        // 2. Supprime toutes les tables existantes (même les corrompues)
+        // 1. Force la fermeture de toute transaction corrompue et nettoie le schéma
+        // CASCADE supprime tout (tables, index, contraintes) sans poser de questions
         DB::statement('DROP SCHEMA public CASCADE;');
         DB::statement('CREATE SCHEMA public;');
         DB::statement('GRANT ALL ON SCHEMA public TO public;');
 
-        // 3. Force la création des tables
-        Artisan::call('migrate', [
-            '--force' => true,
-        ]);
+        // 2. Relance les migrations proprement
+        Artisan::call('migrate', ['--force' => true]);
 
-        return " Victoire ! La base de données est propre et les tables sont créées : <br><pre>" . Artisan::output() . "</pre>";
+        return "Succès ! La base est nettoyée et les tables sont créées. <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
-        return " Erreur critique : " . $e->getMessage();
+        return " Erreur : " . $e->getMessage();
     }
 });
