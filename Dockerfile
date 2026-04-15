@@ -1,5 +1,5 @@
 # -------- 1. Image de base PHP --------
-FROM php:8.2-cli
+FROM php:8.3-cli
 
 # -------- 2. Installer dépendances système --------
 RUN apt-get update && apt-get install -y \
