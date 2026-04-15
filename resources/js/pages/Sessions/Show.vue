@@ -197,8 +197,20 @@ const modeEdition = ref(false);
 const modifie     = ref(false);
 const sauvegarde  = ref(false);
 
-// Surveiller les changements
-watch(programmationLocale, () => { modifie.value = true; }, { deep: true });
+// Synchronisation automatique avec les props (CORRECTION PRINCIPALE)
+watch(() => props.session.programmation, (newVal) => {
+    if (newVal) {
+        programmationLocale.value = JSON.parse(JSON.stringify(newVal));
+        modifie.value = false;
+    } else {
+        programmationLocale.value = null;
+    }
+});
+
+// Surveiller les changements locaux
+watch(programmationLocale, () => { 
+    modifie.value = true; 
+}, { deep: true });
 
 const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const getNomMois = (m) => moisNoms[m - 1];
@@ -251,13 +263,12 @@ const getRoles = (culte, dimanche) => {
     ];
 };
 
-// Modifier une valeur dans la programmation locale
+// Modifier une valeur
 const setValeur = (dimanche, culte, champ, index, valeur) => {
     const entry = programmationLocale.value?.find(p => p.date === dimanche && p.culte === culte);
     if (!entry) return;
     if (!entry[champ]) entry[champ] = [];
     entry[champ][index] = valeur || null;
-    modifie.value = true;
 };
 
 const setValeurRole = (dimanche, culte, key, index, valeur) => {
@@ -268,7 +279,7 @@ const setValeurRole = (dimanche, culte, key, index, valeur) => {
         const sous = key.split('.')[1];
         if (!entry.choeur) entry.choeur = {};
         if (!entry.choeur[sous]) entry.choeur[sous] = [];
-        // Pour sopra (2 personnes), on split par virgule
+
         if (sous === 'sopra') {
             entry.choeur[sous] = valeur ? valeur.split(',').map(v => v.trim()).filter(Boolean) : [];
         } else {
@@ -278,26 +289,40 @@ const setValeurRole = (dimanche, culte, key, index, valeur) => {
         if (!entry[key]) entry[key] = [];
         entry[key][0] = valeur || null;
     }
-    modifie.value = true;
 };
 
+//  Sauvegarde avec reload
 const sauvegarder = () => {
     sauvegarde.value = true;
+
     router.put(route('programmation.modifier', props.session.id), {
         programmation: programmationLocale.value,
     }, {
+        preserveScroll: true,
         onSuccess: () => {
-            modifie.value   = false;
+            modifie.value = false;
             sauvegarde.value = false;
             modeEdition.value = false;
+            router.reload({ only: ['session'] });
         },
-        onError: () => { sauvegarde.value = false; }
+        onError: () => {
+            sauvegarde.value = false;
+        }
     });
 };
 
 const precedent = () => { if (indexActif.value > 0) indexActif.value--; };
 const suivant   = () => { if (indexActif.value < dimanches.value.length - 1) indexActif.value++; };
-const generer   = () => router.post(route('programmation.generer', props.session.id));
+
+// Génération avec reload
+const generer = () => {
+    router.post(route('programmation.generer', props.session.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            router.reload({ only: ['session'] });
+        }
+    });
+};
 </script>
 
 <style scoped>
