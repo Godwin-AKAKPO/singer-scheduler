@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->integer('annee');
             $table->integer('mois'); // 1 à 12
-            $table->jsonb('absences')->nullable(); // [{nom, dates}]
-            $table->jsonb('programmation')->nullable(); // résultat généré
+            $table->json('absences')->nullable(); // [{nom, dates}]
+            $table->json('programmation')->nullable(); // résultat généré
             $table->timestamps();
 
             $table->unique(['annee', 'mois']); // un seul planning par mois
