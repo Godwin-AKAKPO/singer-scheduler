@@ -12,7 +12,7 @@ php artisan route:cache
 php artisan view:cache
 
 echo "==> Migrations..."
-php artisan migrate --force --no-interaction
+php artisan migrate --force --no-interaction --seed
 
 echo "==> Démarrage des services..."
 exec /usr/bin/supervisord -c /etc/supervisord.conf
