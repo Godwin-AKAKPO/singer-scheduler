@@ -95,7 +95,7 @@
 
         .badge {
             display: inline-block;
-            padding: 2px 6px;s
+            padding: 2px 6px;
             border-radius: 3px;
             font-size: 7.5px;
             font-weight: bold;

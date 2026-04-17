@@ -7,7 +7,7 @@
                 <div class="flex justify-between items-center h-16">
 
                     <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
+                        <div class="shrink-0">
                             <Link :href="route('membres.index')" class="flex items-center space-x-3 group">
                               
                                 <div class="hidden sm:block">
@@ -88,7 +88,7 @@
         <!-- Flash success -->
         <div v-if="$page.props.flash?.success" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             <div class="flex items-center gap-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-sm">
-                <svg class="h-4 w-4 flex-shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg class="h-4 w-4 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
                 {{ $page.props.flash.success }}
