@@ -17,33 +17,28 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- Sauvegarder les modifs -->
-                    <button v-if="session.programmation && modifie"
-                        @click="sauvegarder"
-                        :disabled="sauvegarde"
+                    <button v-if="programmationLocale && modifie"
+                        @click="sauvegarder" :disabled="sauvegarde"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-60">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                         </svg>
-                        Sauvegarder les modifications
+                        Sauvegarder
                     </button>
-
-                    <a v-if="session.programmation && !modifie"
-                        :href="route('programmation.pdf', session.id)"
-                        target="_blank"
+                    <a v-if="programmationLocale && !modifie"
+                        :href="route('programmation.pdf', session.id)" target="_blank"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         Exporter PDF
                     </a>
-
                     <button @click="generer"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        {{ session.programmation ? 'Regénérer' : 'Générer' }}
+                        {{ programmationLocale ? 'Regénérer' : 'Générer' }}
                     </button>
                 </div>
             </div>
@@ -69,10 +64,10 @@
 
                 <!-- Bandeau mode édition -->
                 <div v-if="modeEdition" class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
-                    <svg class="h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg class="h-4 w-4 flex-shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <span>Mode édition actif — cliquez sur un nom pour le modifier.</span>
+                    <span>Mode édition — les listes proposent uniquement les membres disponibles et non programmés ce dimanche.</span>
                     <button @click="modeEdition = false" class="ml-auto text-amber-600 hover:text-amber-800 font-medium text-xs">Terminer</button>
                 </div>
 
@@ -123,10 +118,10 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs text-gray-400">{{ formatDateCourt(dimanches[indexActif]) }}</span>
-                                    <button @click="modeEdition = !modeEdition"
-                                        class="flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                                        :class="modeEdition ? 'text-amber-500 bg-amber-50' : ''"
-                                        title="Modifier la programmation">
+                                    <button @click="toggleEdition(culte)"
+                                        class="flex items-center justify-center w-6 h-6 rounded transition-colors"
+                                        :class="modeEdition && culteEnEdition === culte ? 'text-amber-500 bg-amber-50' : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50'"
+                                        title="Modifier">
                                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
@@ -136,21 +131,25 @@
 
                             <!-- Lead -->
                             <div class="px-5 py-4 flex items-center gap-3 border-b border-gray-50">
-                                <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <div class="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                                     <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1">
                                     <p class="text-xs text-gray-400 font-medium uppercase tracking-wide leading-none mb-1">Lead</p>
-                                    <div v-if="!modeEdition" class="text-sm font-bold text-gray-900">
-                                        {{ getCulteLocal(dimanches[indexActif], culte)?.lead?.[0] ?? '—' }}
+                                    <div v-if="!isEditing(culte)">
+                                        <span :class="getCulteLocal(dimanches[indexActif], culte)?.lead?.[0] ? 'text-sm font-bold text-gray-900' : 'text-sm text-gray-300'">
+                                            {{ getCulteLocal(dimanches[indexActif], culte)?.lead?.[0] ?? '—' }}
+                                        </span>
                                     </div>
-                                    <input v-else
-                                        :value="getCulteLocal(dimanches[indexActif], culte)?.lead?.[0] ?? ''"
-                                        @change="e => setValeur(dimanches[indexActif], culte, 'lead', 0, e.target.value)"
-                                        class="w-full text-sm font-bold text-gray-900 border-b border-emerald-300 focus:outline-none focus:border-emerald-500 bg-transparent pb-0.5"
-                                        placeholder="—"
+                                    <SelectMembre v-else
+                                        :session-id="session.id"
+                                        :dimanche="dimanches[indexActif]"
+                                        :culte="culte"
+                                        role="lead"
+                                        :valeur="getCulteLocal(dimanches[indexActif], culte)?.lead?.[0] ?? ''"
+                                        @change="v => setValeur(dimanches[indexActif], culte, 'lead', 0, v)"
                                     />
                                 </div>
                             </div>
@@ -159,15 +158,40 @@
                             <div class="px-5 py-4 grid grid-cols-2 gap-x-6 gap-y-4">
                                 <div v-for="role in getRoles(culte, dimanches[indexActif])" :key="role.key">
                                     <p class="text-xs text-gray-400 font-medium uppercase tracking-wide leading-none mb-1">{{ role.label }}</p>
-                                    <div v-if="!modeEdition" :class="role.valeur !== '—' ? 'text-sm font-medium text-gray-800' : 'text-sm text-gray-300'">
-                                        {{ role.valeur }}
+                                    <div v-if="!isEditing(culte)">
+                                        <span :class="role.valeur !== '—' ? 'text-sm font-medium text-gray-800' : 'text-sm text-gray-300'">
+                                            {{ role.valeur }}
+                                        </span>
                                     </div>
-                                    <input v-else
-                                        :value="role.valeur === '—' ? '' : role.valeur"
-                                        @change="e => setValeurRole(dimanches[indexActif], culte, role.key, role.index, e.target.value)"
-                                        class="w-full text-sm font-medium text-gray-800 border-b border-emerald-300 focus:outline-none focus:border-emerald-500 bg-transparent pb-0.5"
-                                        placeholder="—"
-                                    />
+                                    <template v-else>
+                                        <!-- Sopra : 2 membres, deux selects -->
+                                        <div v-if="role.key === 'choeur.sopra'" class="space-y-1">
+                                            <SelectMembre
+                                                :session-id="session.id"
+                                                :dimanche="dimanches[indexActif]"
+                                                :culte="culte"
+                                                role="choeur_sopra"
+                                                :valeur="getCulteLocal(dimanches[indexActif], culte)?.choeur?.sopra?.[0] ?? ''"
+                                                @change="v => setSopra(dimanches[indexActif], culte, 0, v)"
+                                            />
+                                            <SelectMembre
+                                                :session-id="session.id"
+                                                :dimanche="dimanches[indexActif]"
+                                                :culte="culte"
+                                                role="choeur_sopra"
+                                                :valeur="getCulteLocal(dimanches[indexActif], culte)?.choeur?.sopra?.[1] ?? ''"
+                                                @change="v => setSopra(dimanches[indexActif], culte, 1, v)"
+                                            />
+                                        </div>
+                                        <SelectMembre v-else
+                                            :session-id="session.id"
+                                            :dimanche="dimanches[indexActif]"
+                                            :culte="culte"
+                                            :role="role.dbKey"
+                                            :valeur="role.valeur === '—' ? '' : role.valeur"
+                                            @change="v => setValeurRole(dimanches[indexActif], culte, role.key, v)"
+                                        />
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -180,37 +204,25 @@
 
 <script setup>
 import AppLayout from '@/pages/AppLayout.vue';
+import SelectMembre from '@/Components/SelectMembre.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 
 const props = defineProps({ session: Object });
 
-// Copie locale modifiable
 const programmationLocale = ref(
     props.session.programmation
         ? JSON.parse(JSON.stringify(props.session.programmation))
         : null
 );
 
-const indexActif  = ref(0);
-const modeEdition = ref(false);
-const modifie     = ref(false);
-const sauvegarde  = ref(false);
+const indexActif    = ref(0);
+const modeEdition   = ref(false);
+const culteEnEdition = ref(null);
+const modifie       = ref(false);
+const sauvegarde    = ref(false);
 
-// Synchronisation automatique avec les props (CORRECTION PRINCIPALE)
-watch(() => props.session.programmation, (newVal) => {
-    if (newVal) {
-        programmationLocale.value = JSON.parse(JSON.stringify(newVal));
-        modifie.value = false;
-    } else {
-        programmationLocale.value = null;
-    }
-});
-
-// Surveiller les changements locaux
-watch(programmationLocale, () => { 
-    modifie.value = true; 
-}, { deep: true });
+watch(programmationLocale, () => { modifie.value = true; }, { deep: true });
 
 const moisNoms = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 const getNomMois = (m) => moisNoms[m - 1];
@@ -230,99 +242,83 @@ const dimanches = computed(() => {
     return result;
 });
 
-const getJour = (dateStr) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).getDate();
-};
+const getJour       = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d).getDate(); };
+const getJourAbrege = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('fr-FR',{weekday:'short'}).replace('.',''); };
+const formatDateCourt = (s) => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}); };
 
-const getJourAbrege = (dateStr) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
-};
-
-const formatDateCourt = (dateStr) => {
-    const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-};
-
-const getCulteLocal = (dimanche, culte) => {
-    return programmationLocale.value?.find(p => p.date === dimanche && p.culte === culte);
-};
+const getCulteLocal = (dimanche, culte) => programmationLocale.value?.find(p => p.date === dimanche && p.culte === culte);
 
 const getRoles = (culte, dimanche) => {
     const c = getCulteLocal(dimanche, culte);
     return [
-        { key: 'choeur.sopra', label: 'Sopra',    valeur: c?.choeur?.sopra?.join(', ') || '—', index: null },
-        { key: 'choeur.alto',  label: 'Alto',     valeur: c?.choeur?.alto?.[0]         ?? '—', index: 0    },
-        { key: 'choeur.tenor', label: 'Ténor',    valeur: c?.choeur?.tenor?.[0]        ?? '—', index: 0    },
-        { key: 'piano1',       label: 'Piano 1',  valeur: c?.piano1?.[0]               ?? '—', index: 0    },
-        { key: 'piano2',       label: 'Piano 2',  valeur: c?.piano2?.[0]               ?? '—', index: 0    },
-        { key: 'solo',         label: 'Solo',     valeur: c?.solo?.[0]                 ?? '—', index: 0    },
-        { key: 'basse',        label: 'Basse',    valeur: c?.basse?.[0]                ?? '—', index: 0    },
-        { key: 'batterie',     label: 'Batterie', valeur: c?.batterie?.[0]             ?? '—', index: 0    },
+        { key: 'choeur.sopra', dbKey: 'choeur_sopra', label: 'Sopra',    valeur: c?.choeur?.sopra?.join(', ') || '—' },
+        { key: 'choeur.alto',  dbKey: 'choeur_alto',  label: 'Alto',     valeur: c?.choeur?.alto?.[0]  ?? '—' },
+        { key: 'choeur.tenor', dbKey: 'choeur_tenor', label: 'Ténor',    valeur: c?.choeur?.tenor?.[0] ?? '—' },
+        { key: 'piano1',       dbKey: 'piano1',       label: 'Piano 1',  valeur: c?.piano1?.[0]        ?? '—' },
+        { key: 'piano2',       dbKey: 'piano2',       label: 'Piano 2',  valeur: c?.piano2?.[0]        ?? '—' },
+        { key: 'solo',         dbKey: 'solo',         label: 'Solo',     valeur: c?.solo?.[0]          ?? '—' },
+        { key: 'basse',        dbKey: 'basse',        label: 'Basse',    valeur: c?.basse?.[0]         ?? '—' },
+        { key: 'batterie',     dbKey: 'batterie',     label: 'Batterie', valeur: c?.batterie?.[0]      ?? '—' },
     ];
 };
 
-// Modifier une valeur
+const toggleEdition = (culte) => {
+    if (modeEdition.value && culteEnEdition.value === culte) {
+        modeEdition.value = false;
+        culteEnEdition.value = null;
+    } else {
+        modeEdition.value = true;
+        culteEnEdition.value = culte;
+    }
+};
+
+const isEditing = (culte) => modeEdition.value && culteEnEdition.value === culte;
+
 const setValeur = (dimanche, culte, champ, index, valeur) => {
     const entry = programmationLocale.value?.find(p => p.date === dimanche && p.culte === culte);
     if (!entry) return;
     if (!entry[champ]) entry[champ] = [];
     entry[champ][index] = valeur || null;
+    modifie.value = true;
 };
 
-const setValeurRole = (dimanche, culte, key, index, valeur) => {
+const setSopra = (dimanche, culte, index, valeur) => {
     const entry = programmationLocale.value?.find(p => p.date === dimanche && p.culte === culte);
     if (!entry) return;
+    if (!entry.choeur) entry.choeur = {};
+    if (!entry.choeur.sopra) entry.choeur.sopra = [];
+    entry.choeur.sopra[index] = valeur || null;
+    modifie.value = true;
+};
 
+const setValeurRole = (dimanche, culte, key, valeur) => {
+    const entry = programmationLocale.value?.find(p => p.date === dimanche && p.culte === culte);
+    if (!entry) return;
     if (key.startsWith('choeur.')) {
         const sous = key.split('.')[1];
         if (!entry.choeur) entry.choeur = {};
         if (!entry.choeur[sous]) entry.choeur[sous] = [];
-
-        if (sous === 'sopra') {
-            entry.choeur[sous] = valeur ? valeur.split(',').map(v => v.trim()).filter(Boolean) : [];
-        } else {
-            entry.choeur[sous][0] = valeur || null;
-        }
+        entry.choeur[sous][0] = valeur || null;
     } else {
         if (!entry[key]) entry[key] = [];
         entry[key][0] = valeur || null;
     }
+    modifie.value = true;
 };
 
-//  Sauvegarde avec reload
 const sauvegarder = () => {
     sauvegarde.value = true;
-
     router.put(route('programmation.modifier', props.session.id), {
         programmation: programmationLocale.value,
     }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            modifie.value = false;
-            sauvegarde.value = false;
-            modeEdition.value = false;
-            router.reload({ only: ['session'] });
-        },
-        onError: () => {
-            sauvegarde.value = false;
-        }
+        onSuccess: () => { modifie.value = false; sauvegarde.value = false; modeEdition.value = false; culteEnEdition.value = null; },
+        onError:   () => { sauvegarde.value = false; }
     });
 };
 
 const precedent = () => { if (indexActif.value > 0) indexActif.value--; };
 const suivant   = () => { if (indexActif.value < dimanches.value.length - 1) indexActif.value++; };
-
-// Génération avec reload
-const generer = () => {
-    router.post(route('programmation.generer', props.session.id), {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            router.reload({ only: ['session'] });
-        }
-    });
-};
+const generer   = () => router.post(route('programmation.generer', props.session.id));
 </script>
 
 <style scoped>
