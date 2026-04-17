@@ -10,7 +10,7 @@ Route::get('/', fn() => redirect()->route('membres.index'));
 Route::resource('membres', MembreController::class);
 Route::resource('sessions', SessionMensuelleController::class);
 
-Route::post('sessions/{session}/generer',  [ProgrammationController::class, 'generer'])->name('programmation.generer');
-Route::put('sessions/{session}/modifier',  [ProgrammationController::class, 'modifier'])->name('programmation.modifier');
-Route::get('sessions/{session}/pdf',       [ProgrammationController::class, 'exportPdf'])->name('programmation.pdf');
-
+Route::post('sessions/{session}/generer',              [ProgrammationController::class, 'generer'])->name('programmation.generer');
+Route::put('sessions/{session}/modifier',              [ProgrammationController::class, 'modifier'])->name('programmation.modifier');
+Route::get('sessions/{session}/pdf',                   [ProgrammationController::class, 'exportPdf'])->name('programmation.pdf');
+Route::get('sessions/{session}/membres-disponibles',   [ProgrammationController::class, 'membresDisponibles'])->name('programmation.membres-disponibles');
