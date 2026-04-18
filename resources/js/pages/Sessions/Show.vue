@@ -204,9 +204,76 @@
 
 <script setup>
 import AppLayout from '@/pages/AppLayout.vue';
-import SelectMembre from '@/Components/SelectMembre.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, defineComponent, h, resolveComponent } from 'vue';
+import axios from 'axios';
+
+// ─── Composant SelectMembre (inline) ────────────────────────────────────────
+const SelectMembre = defineComponent({
+    name: 'SelectMembre',
+    props: {
+        sessionId: { type: Number, required: true },
+        dimanche:  { type: String, required: true },
+        culte:     { type: String, required: true },
+        role:      { type: String, required: true },
+        valeur:    { type: String, default: '' },
+    },
+    emits: ['change'],
+    setup(props, { emit }) {
+        const membres    = ref([]);
+        const chargement = ref(false);
+        const charge     = ref(false);
+
+        const charger = async () => {
+            if (charge.value) return;
+            chargement.value = true;
+            try {
+                const { data } = await axios.get(
+                    `/sessions/${props.sessionId}/membres-disponibles`,
+                    { params: { dimanche: props.dimanche, culte: props.culte, role: props.role } }
+                );
+                membres.value = data;
+                charge.value  = true;
+            } catch (e) {
+                console.error('Erreur chargement membres', e);
+            } finally {
+                chargement.value = false;
+            }
+        };
+
+        return () => h('div', { class: 'relative' }, [
+            h('select', {
+                value: props.valeur,
+                onChange: (e) => emit('change', e.target.value),
+                onFocus: charger,
+                class: 'w-full text-sm font-medium text-gray-800 border border-emerald-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white appearance-none pr-6',
+            }, [
+                h('option', { value: '' }, '— choisir —'),
+                props.valeur && !membres.value.includes(props.valeur)
+                    ? h('option', { value: props.valeur }, `${props.valeur} (actuel)`)
+                    : null,
+                ...membres.value.map(nom => h('option', { key: nom, value: nom }, nom)),
+            ]),
+            // Chevron
+            h('svg', {
+                class: 'pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400',
+                fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor',
+            }, [
+                h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M19 9l-7 7-7-7' }),
+            ]),
+            // Spinner
+            chargement.value
+                ? h('div', { class: 'absolute inset-0 flex items-center justify-center bg-white/70 rounded-md' }, [
+                    h('svg', { class: 'h-3.5 w-3.5 text-emerald-500 animate-spin', fill: 'none', viewBox: '0 0 24 24' }, [
+                        h('circle', { class: 'opacity-25', cx: '12', cy: '12', r: '10', stroke: 'currentColor', 'stroke-width': '4' }),
+                        h('path', { class: 'opacity-75', fill: 'currentColor', d: 'M4 12a8 8 0 018-8v8H4z' }),
+                    ]),
+                ])
+                : null,
+        ]);
+    },
+});
+// ────────────────────────────────────────────────────────────────────────────
 
 const props = defineProps({ session: Object });
 
@@ -216,11 +283,11 @@ const programmationLocale = ref(
         : null
 );
 
-const indexActif    = ref(0);
-const modeEdition   = ref(false);
+const indexActif     = ref(0);
+const modeEdition    = ref(false);
 const culteEnEdition = ref(null);
-const modifie       = ref(false);
-const sauvegarde    = ref(false);
+const modifie        = ref(false);
+const sauvegarde     = ref(false);
 
 watch(programmationLocale, () => { modifie.value = true; }, { deep: true });
 
