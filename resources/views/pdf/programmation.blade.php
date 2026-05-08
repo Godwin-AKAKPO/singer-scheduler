@@ -7,71 +7,53 @@
 
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 9px;
+            font-size: 13px;
             color: #1f2937;
             background: #ffffff;
-            padding: 28px 32px;
+            padding: 20px 24px;
         }
 
         .header {
-            margin-bottom: 20px;
-            padding-bottom: 14px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #e5e7eb;
         }
 
         .org {
-            font-size: 8px;
+            font-size: 11px;
             font-weight: bold;
             color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .titre-ligne {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-        }
-
-        .titre {
-            font-size: 16px;
-            font-weight: bold;
-            color: #111827;
-        }
-
-        .mois {
-            font-size: 13px;
-            font-weight: bold;
-            color: #059669;
         }
 
         .verse {
-            margin-top: 8px;
+            margin-top: 6px;
             font-style: italic;
-            font-size: 7.5px;
+            font-size: 10px;
             color: #9ca3af;
         }
 
+        /* ── Tableau ── */
         table {
             width: 100%;
             border-collapse: collapse;
         }
 
         thead th {
-            padding: 8px 6px;
+            padding: 10px 8px;
             text-align: left;
-            font-size: 7.5px;
+            font-size: 11px;
             font-weight: bold;
             color: #6b7280;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
-            border-bottom: 1.5px solid #111827;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #111827;
         }
 
         .sep td {
-            padding: 10px 6px 4px;
-            font-size: 8px;
+            padding: 13px 8px 5px;
+            font-size: 12px;
             font-weight: bold;
             color: #059669;
             border-top: 1px solid #d1fae5;
@@ -83,10 +65,10 @@
         }
 
         .row-culte td {
-            padding: 5px 6px;
+            padding: 8px 8px;
             vertical-align: middle;
             border-bottom: 1px solid #f3f4f6;
-            font-size: 9px;
+            font-size: 13px;
         }
 
         .row-culte.c2 td {
@@ -95,19 +77,41 @@
 
         .badge {
             display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 7.5px;
+            padding: 3px 9px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: bold;
         }
 
         .badge-c1 { background: #059669; color: #ffffff; }
         .badge-c2 { background: #f3f4f6; color: #374151; }
 
-        .vide { color: #d1d5db; }
+        /* ── Page 2 : Principes + Footer ── */
+        .page-break {
+            page-break-before: always;
+        }
+
+        .principes {
+            padding-top: 40px;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.8;
+        }
+
+        .principes strong {
+            color: #374151;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .principes ol { padding-left: 18px; }
+        .principes li { margin-bottom: 6px; }
 
         .footer {
-            margin-top: 20px;
+            margin-top: 40px;
             padding-top: 12px;
             border-top: 1px solid #e5e7eb;
             display: flex;
@@ -116,44 +120,25 @@
         }
 
         .slogan {
-            font-size: 9px;
+            font-size: 12px;
             font-weight: bold;
             color: #059669;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
         }
 
-        .genere { font-size: 7px; color: #9ca3af; }
-
-        .principes {
-            margin-top: 14px;
-            font-size: 7.5px;
-            color: #6b7280;
-            line-height: 1.6;
-        }
-
-        .principes strong {
-            color: #374151;
-            font-size: 7.5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .principes ol { padding-left: 12px; margin-top: 4px; }
-        .principes li { margin-bottom: 2px; }
+        .genere { font-size: 10px; color: #9ca3af; }
     </style>
 </head>
 <body>
 
+    <!-- En-tête compact -->
     <div class="header">
-        <div class="org">Groupe Musical Salem Singers · EEAD-TU</div>
-        <div class="titre-ligne">
-            <div class="titre">Programmation des cultes</div>
-            <div class="mois">{{ $moisNom }} {{ $session->annee }}</div>
-        </div>
-       
+        <div class="org">Groupe Musical Salem Singers · EEAD-TU · Programmation des cultes · {{ $moisNom }} {{ $session->annee }}</div>
+        <div class="verse">Hébreux 13 v 15 — Par lui, offrons sans cesse à Dieu un sacrifice de louange, c'est-à-dire le fruit de lèvres qui confessent son nom.</div>
     </div>
 
+    <!-- Tableau occupe tout le reste de la page 1 -->
     <table>
         <thead>
             <tr>
@@ -173,13 +158,11 @@
             @foreach($dimanches as $dimanche)
                 @php
                     $date = \Carbon\Carbon::parse($dimanche)->locale('fr');
-                    $dateFormatee = $date->isoFormat(' D MMMM');
+                    $dateFormatee = $date->isoFormat('D MMMM');
                     $c1 = collect($programmation)->firstWhere(fn($p) => $p['date'] === $dimanche && $p['culte'] === 'C1');
                     $c2 = collect($programmation)->firstWhere(fn($p) => $p['date'] === $dimanche && $p['culte'] === 'C2');
-
-                    // Helper pour afficher proprement une valeur ou un tiret
-                    $val = fn($v) => $v ?: '—';
-                    $vals = fn($arr) => !empty($arr) ? implode(', ', array_filter($arr)) : '—';
+                    $val  = fn($v) => $v ?: '—';
+                    $vals = fn($arr) => !empty(array_filter($arr ?? [])) ? implode(', ', array_filter($arr)) : '—';
                 @endphp
 
                 <tr class="sep"><td colspan="10">{{ $dateFormatee }}</td></tr>
@@ -213,18 +196,20 @@
         </tbody>
     </table>
 
-    <div class="principes">
-        <strong>Principes</strong>
-        <ol>
-            <li>Le forum est actualisé au plus tard le Mercredi. Le lead partage son répertoire au plus tard le Mercredi soir.</li>
-            <li>Les COs se réservent le droit de remplacer les membres irréguliers aux répétitions, sans motifs valables.</li>
-            <li>Les membres ne venant aux cultes que lorsqu'ils sont programmés sont progressivement retirés des programmations.</li>
-        </ol>
-        <strong>Hébreux 13 v 15 : Par lui, offrons sans cesse à Dieu un sacrifice de louange, c’est-à-dire le fruit de lèvres qui confessent son nom</strong>
-    </div>
+    <!-- Page 2 : Principes + Footer -->
+    <div class="page-break">
+        <div class="principes">
+            <strong>Principes</strong>
+            <ol>
+                <li>Le forum est actualisé au plus tard le Mercredi. Le lead partage son répertoire au plus tard le Mercredi soir.</li>
+                <li>Les COs se réservent le droit de remplacer les membres irréguliers aux répétitions, sans motifs valables.</li>
+                <li>Les membres ne venant aux cultes que lorsqu'ils sont programmés sont progressivement retirés des programmations.</li>
+            </ol>
+        </div>
 
-    <div class="footer">
-        <div class="slogan">Dieu élève Salem Singers !!!</div>
+        <div class="footer">
+            <div class="slogan">Dieu élève Salem Singers !!!</div>
+        </div>
     </div>
 
 </body>
