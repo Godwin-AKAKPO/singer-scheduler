@@ -141,7 +141,7 @@ class ProgrammationController extends Controller
         return back()->with('success', 'Programmation mise à jour.');
     }
 
-    public function membresDisponibles(Request $request, SessionMensuelle $session)
+public function membresDisponibles(Request $request, SessionMensuelle $session)
     {
         $request->validate([
             'dimanche' => 'required|date',
@@ -153,24 +153,25 @@ class ProgrammationController extends Controller
         $culte    = $request->culte;
         $role     = $request->role;
 
-        // Membres déjà programmés ce dimanche (C1 ET C2)
+        // Membres déjà programmés dans CE culte uniquement (pas l'autre)
+        // On exclut uniquement les doublons dans le même culte, pas dans l'autre
         $programmation = $session->programmation ?? [];
-        $dejaProgrammes = [];
+        $dejaAssignesCeCulte = [];
 
         foreach ($programmation as $entry) {
-            if ($entry['date'] !== $dimanche) continue;
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['lead'] ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['choeur']['sopra'] ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['choeur']['alto']  ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['choeur']['tenor'] ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['piano1']   ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['piano2']   ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['solo']     ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['basse']    ?? []);
-            $dejaProgrammes = array_merge($dejaProgrammes, $entry['batterie'] ?? []);
+            if ($entry['date'] !== $dimanche || $entry['culte'] !== $culte) continue;
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['lead'] ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['choeur']['sopra'] ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['choeur']['alto']  ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['choeur']['tenor'] ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['piano1']   ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['piano2']   ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['solo']     ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['basse']    ?? []);
+            $dejaAssignesCeCulte = array_merge($dejaAssignesCeCulte, $entry['batterie'] ?? []);
         }
 
-        $dejaProgrammes = array_unique(array_filter($dejaProgrammes));
+        $dejaAssignesCeCulte = array_unique(array_filter($dejaAssignesCeCulte));
 
         // Absences ce dimanche
         $absences = $session->absences ?? [];
@@ -202,7 +203,10 @@ class ProgrammationController extends Controller
             ->orderBy('nom')
             ->get(['nom'])
             ->pluck('nom')
-            ->filter(fn($nom) => !in_array($nom, $dejaProgrammes) && !in_array($nom, $absentsJour))
+            ->filter(fn($nom) =>
+                !in_array($nom, $dejaAssignesCeCulte) &&
+                !in_array($nom, $absentsJour)
+            )
             ->values();
 
         return response()->json($membres);
