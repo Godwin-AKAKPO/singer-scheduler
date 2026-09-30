@@ -7,12 +7,12 @@ cd /var/www/html
 # php artisan key:generate --force
 
 echo "==> Cache config + routes..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+timeout 60 php artisan config:cache || echo "config:cache failed or timed out"
+timeout 60 php artisan route:cache || echo "route:cache failed or timed out"
+timeout 60 php artisan view:cache || echo "view:cache failed or timed out"
 
 echo "==> Migrations..."
-php artisan migrate --force --no-interaction
+timeout 90 php artisan migrate --force --no-interaction || echo "migration failed or timed out, starting services anyway"
 
 echo "==> Démarrage des services..."
 exec /usr/bin/supervisord -c /etc/supervisord.conf
