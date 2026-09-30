@@ -9,7 +9,7 @@ class MembreSeeder extends Seeder
 {
     public function run(): void
     {
-        Membre::truncate();
+
 
         $membres = [
 
@@ -78,7 +78,7 @@ class MembreSeeder extends Seeder
         ];
 
         foreach ($membres as $data) {
-            Membre::create([
+            Membre::updateOrCreate(['nom' => $data['nom']], [
                 'nom'              => $data['nom'],
                 'cultes_autorises' => $data['cultes'],
                 'lead_c1'          => $data['lead_c1'],
